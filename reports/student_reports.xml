@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_student_profile" model="ir.actions.report">
+        <field name="name">Student Profile</field>
+        <field name="model">student.student</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_student_profile</field>
+        <field name="report_file">student_management.report_student_profile</field>
+        <field name="binding_model_id" ref="model_student_student"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(6, 0, [ref('group_student_admission')])]"/>
+    </record>
+    <template id="report_student_profile">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="student">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Student Profile</h2>
+                        <table class="table table-sm">
+                            <tr><th>Student ID</th><td t-out="student.student_number"/></tr>
+                            <tr><th>Name</th><td t-out="student.name"/></tr>
+                            <tr><th>Email</th><td t-out="student.email"/></tr>
+                            <tr><th>Phone</th><td t-out="student.phone"/></tr>
+                            <tr><th>Admission Date</th><td t-out="student.admission_date"/></tr>
+                            <tr><th>Class</th><td t-out="student.class_id.name"/></tr>
+                            <tr><th>Section</th><td t-out="student.section_id.name"/></tr>
+                            <tr><th>Academic Status</th><td t-out="student.academic_status"/></tr>
+                            <tr><th>Attendance</th><td><span t-out="student.attendance_percentage * 100"/>%</td></tr>
+                        </table>
+                        <h3>Guardians</h3>
+                        <table class="table table-sm">
+                            <thead><tr><th>Name</th><th>Relationship</th><th>Phone</th><th>Email</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="student.guardian_ids" t-as="guardian">
+                                    <td t-out="guardian.name"/><td t-out="guardian.relationship"/>
+                                    <td t-out="guardian.phone"/><td t-out="guardian.email"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_student_result_card" model="ir.actions.report">
+        <field name="name">Student Result Card</field>
+        <field name="model">student.exam.result</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_student_result_card</field>
+        <field name="report_file">student_management.report_student_result_card</field>
+        <field name="binding_model_id" ref="model_student_exam_result"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(6, 0, [ref('group_student_admission'), ref('group_student_teacher')])]"/>
+    </record>
+    <template id="report_student_result_card">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="result">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Examination Result</h2>
+                        <table class="table table-sm">
+                            <tr><th>Student</th><td t-out="result.student_id.name"/></tr>
+                            <tr><th>Student ID</th><td t-out="result.student_id.student_number"/></tr>
+                            <tr><th>Academic Year</th><td t-out="result.academic_year_id.name"/></tr>
+                            <tr><th>Course</th><td t-out="result.course_id.name"/></tr>
+                            <tr><th>Examination</th><td t-out="result.exam_id.name"/></tr>
+                            <tr><th>Marks</th><td><span t-out="result.obtained_marks"/> / <span t-out="result.max_marks"/></td></tr>
+                            <tr><th>Percentage</th><td><span t-out="result.percentage * 100"/>%</td></tr>
+                            <tr><th>Grade</th><td t-out="result.grade"/></tr>
+                            <tr><th>Status</th><td t-out="result.result_status"/></tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_student_fee_statement" model="ir.actions.report">
+        <field name="name">Student Fee Statement</field>
+        <field name="model">student.fee</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_student_fee_statement</field>
+        <field name="report_file">student_management.report_student_fee_statement</field>
+        <field name="binding_model_id" ref="model_student_fee"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(6, 0, [ref('group_student_admission'), ref('group_student_accountant')])]"/>
+    </record>
+    <template id="report_student_fee_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="fee">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Student Fee Statement</h2>
+                        <table class="table table-sm">
+                            <tr><th>Student</th><td t-out="fee.student_id.name"/></tr>
+                            <tr><th>Student ID</th><td t-out="fee.student_id.student_number"/></tr>
+                            <tr><th>Fee Reference</th><td t-out="fee.name"/></tr>
+                            <tr><th>Description</th><td t-out="fee.fee_structure_id.name"/></tr>
+                            <tr><th>Academic Year</th><td t-out="fee.academic_year_id.name"/></tr>
+                            <tr><th>Billing Period</th><td t-out="fee.period"/></tr>
+                            <tr><th>Due Date</th><td t-out="fee.due_date"/></tr>
+                            <tr><th>Fee Amount</th><td t-out="format_amount(fee.amount_total, fee.currency_id)"/></tr>
+                            <tr><th>Outstanding</th><td t-out="format_amount(fee.balance_due, fee.currency_id)"/></tr>
+                            <tr><th>Status</th><td t-out="fee.state"/></tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_attendance_register" model="ir.actions.report">
+        <field name="name">Attendance Register</field>
+        <field name="model">student.attendance.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_attendance_register</field>
+        <field name="report_file">student_management.report_attendance_register</field>
+        <field name="binding_model_id" ref="model_student_attendance_session"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(6, 0, [ref('group_student_admission'), ref('group_student_teacher')])]"/>
+    </record>
+    <template id="report_attendance_register">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="session">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Attendance Register</h2>
+                        <table class="table table-sm">
+                            <tr><th>Session</th><td t-out="session.name"/></tr>
+                            <tr><th>Date</th><td t-out="session.session_date"/></tr>
+                            <tr><th>Academic Year</th><td t-out="session.academic_year_id.name"/></tr>
+                            <tr><th>Class</th><td t-out="session.class_id.name"/></tr>
+                            <tr><th>Section</th><td t-out="session.section_id.name"/></tr>
+                            <tr><th>Course</th><td t-out="session.course_id.name or 'All courses'"/></tr>
+                            <tr><th>Teacher</th><td t-out="session.teacher_id.name"/></tr>
+                            <tr><th>State</th><td t-out="session.state"/></tr>
+                        </table>
+                        <table class="table table-sm">
+                            <thead><tr><th>Student ID</th><th>Student</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="session.attendance_ids" t-as="line">
+                                    <td t-out="line.student_id.student_number"/>
+                                    <td t-out="line.student_id.name"/>
+                                    <td t-out="line.status"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_exam_results" model="ir.actions.report">
+        <field name="name">Examination Results</field>
+        <field name="model">student.exam</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_exam_results</field>
+        <field name="report_file">student_management.report_exam_results</field>
+        <field name="binding_model_id" ref="model_student_exam"/>
+        <field name="binding_type">report</field>
+        <field name="group_ids" eval="[(6, 0, [ref('group_student_admission'), ref('group_student_teacher')])]"/>
+    </record>
+    <template id="report_exam_results">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="exam">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Examination Results</h2>
+                        <table class="table table-sm">
+                            <tr><th>Examination</th><td t-out="exam.name"/></tr>
+                            <tr><th>Academic Year</th><td t-out="exam.academic_year_id.name"/></tr>
+                            <tr><th>Course</th><td t-out="exam.course_id.name"/></tr>
+                            <tr><th>Date</th><td t-out="exam.exam_date"/></tr>
+                            <tr><th>Maximum Marks</th><td t-out="exam.max_marks"/></tr>
+                            <tr><th>State</th><td t-out="exam.state"/></tr>
+                        </table>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr><th>Student ID</th><th>Student</th><th>Marks</th><th>Percentage</th><th>Grade</th><th>Result</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="exam.result_ids" t-as="result">
+                                    <td t-out="result.student_id.student_number"/>
+                                    <td t-out="result.student_id.name"/>
+                                    <td><span t-out="result.obtained_marks"/> / <span t-out="result.max_marks"/></td>
+                                    <td><span t-out="'%.2f' % (result.percentage * 100)"/>%</td>
+                                    <td t-out="result.grade"/>
+                                    <td t-out="result.result_status"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

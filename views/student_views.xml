@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ================================= -->
+    <!-- STUDENT VIEWS                    -->
+    <!-- ================================= -->
+
+    <record id="student_student_search_view" model="ir.ui.view">
+        <field name="name">student.student.search</field>
+        <field name="model">student.student</field>
+        <field name="arch" type="xml">
+            <search string="Search Students">
+                <field name="name"/>
+                <field name="student_number"/>
+                <field name="email" groups="student_management.group_student_admission"/>
+                <field name="phone" groups="student_management.group_student_admission"/>
+                <field name="class_id"/>
+                <field name="section_id"/>
+                <field name="academic_status"/>
+                <separator/>
+                <filter name="active_students" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="archived_students" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="male_students" string="Male" domain="[('gender', '=', 'male')]"/>
+                <filter name="female_students" string="Female" domain="[('gender', '=', 'female')]"/>
+                <filter name="graduated_students" string="Graduated" domain="[('academic_status', '=', 'graduated')]"/>
+                <filter name="suspended_students" string="Suspended" domain="[('academic_status', '=', 'suspended')]"/>
+                <filter name="enrolled" string="Enrollment Date Set" domain="[('enrollment_date', '!=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_class" string="Class" context="{'group_by': 'class_id'}"/>
+                    <filter name="group_section" string="Section" context="{'group_by': 'section_id'}"/>
+                    <filter name="group_gender" string="Gender" context="{'group_by': 'gender'}"/>
+                    <filter name="group_enrollment_date" string="Enrollment Month" context="{'group_by': 'enrollment_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="student_student_list_view" model="ir.ui.view">
+        <field name="name">student.student.list</field>
+        <field name="model">student.student</field>
+        <field name="arch" type="xml">
+            <list string="Students">
+                <field name="student_number"/>
+                <field name="name"/>
+                <field name="date_of_birth" groups="student_management.group_student_admission"/>
+                <field name="email" groups="student_management.group_student_admission"/>
+                <field name="phone" groups="student_management.group_student_admission"/>
+                <field name="gender"/>
+                <field name="class_id"/>
+                <field name="section_id"/>
+                <field name="enrollment_date"/>
+                <field name="academic_status"/>
+                <field name="attendance_percentage" widget="percentage" groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="student_student_form_view" model="ir.ui.view">
+        <field name="name">student.student.form</field>
+        <field name="model">student.student</field>
+        <field name="arch" type="xml">
+            <form string="Student">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Student name"/></h1>
+                        <h2><field name="student_number" readonly="1"/></h2>
+                    </div>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_send_admission_confirmation" type="object" class="oe_stat_button" icon="fa-envelope" groups="student_management.group_student_admission" invisible="admission_confirmation_sent">
+                            <div class="o_stat_info"><span class="o_stat_text">Send Admission Email</span></div>
+                        </button>
+                    </div>
+                    <field name="admission_confirmation_sent" invisible="1"/>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <group>
+                        <group>
+                            <field name="date_of_birth" groups="student_management.group_student_admission"/>
+                            <field name="age" readonly="1"/>
+                            <field name="gender"/>
+                            <field name="email" groups="student_management.group_student_admission"/>
+                            <field name="phone" groups="student_management.group_student_admission"/>
+                        </group>
+                        <group>
+                            <field name="admission_date"/>
+                            <field name="enrollment_date"/>
+                            <field name="academic_status"/>
+                            <field name="active"/>
+                            <field name="class_id"/>
+                            <field name="section_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Address" groups="student_management.group_student_admission">
+                            <group>
+                                <field name="street"/>
+                                <field name="street2"/>
+                                <field name="city"/>
+                                <field name="state_id"/>
+                                <field name="zip"/>
+                                <field name="country_id"/>
+                            </group>
+                        </page>
+                        <page string="Guardians" groups="student_management.group_student_admission">
+                            <field name="guardian_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Course Enrollments" groups="student_management.group_student_admission">
+                            <field name="enrollment_ids">
+                                <list editable="bottom">
+                                    <field name="course_id"/>
+                                    <field name="academic_year_id" required="1"/>
+                                    <field name="enrollment_date"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Attendance" groups="student_management.group_student_admission,student_management.group_student_teacher">
+                            <group><field name="attendance_percentage" widget="percentage"/></group>
+                            <field name="attendance_ids" readonly="1">
+                                <list><field name="session_date"/><field name="section_id"/><field name="status"/></list>
+                            </field>
+                        </page>
+                        <page string="Exam Results" groups="student_management.group_student_admission,student_management.group_student_teacher">
+                            <field name="exam_result_ids" readonly="1">
+                                <list><field name="exam_id"/><field name="course_id"/><field name="obtained_marks"/><field name="max_marks"/><field name="percentage" widget="percentage"/><field name="grade"/><field name="result_status"/></list>
+                            </field>
+                        </page>
+                        <page string="Fees" groups="student_management.group_student_admission,student_management.group_student_accountant">
+                            <field name="fee_ids">
+                                <list>
+                                    <field name="name"/><field name="fee_structure_id"/>
+                                    <field name="academic_year_id"/><field name="period"/>
+                                    <field name="amount_total"/><field name="due_date"/><field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Documents" groups="student_management.group_student_admission">
+                            <field name="document_ids">
+                                <list><field name="name"/><field name="document_type"/><field name="document_date"/><field name="valid_until"/></list>
+                            </field>
+                        </page>
+                        <page string="Notes" groups="student_management.group_student_admission">
+                            <field name="notes" placeholder="Internal notes..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter groups="student_management.group_student_admission"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_student" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">student.student</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="student_student_search_view"/>
+    </record>
+
+
+    <!-- ================================= -->
+    <!-- CLASS VIEWS                      -->
+    <!-- ================================= -->
+
+    <record id="student_class_search_view" model="ir.ui.view">
+        <field name="name">student.class.search</field>
+        <field name="model">student.class</field>
+        <field name="arch" type="xml">
+            <search string="Search Classes">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="student_class_list_view" model="ir.ui.view">
+        <field name="name">student.class.list</field>
+        <field name="model">student.class</field>
+        <field name="arch" type="xml">
+            <list string="Classes">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="student_class_form_view" model="ir.ui.view">
+        <field name="name">student.class.form</field>
+        <field name="model">student.class</field>
+        <field name="arch" type="xml">
+            <form string="Class">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Students">
+                            <field name="student_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email" groups="student_management.group_student_admission"/>
+                                    <field name="phone" groups="student_management.group_student_admission"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sections">
+                            <field name="section_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="academic_year_id"/>
+                                    <field name="capacity"/>
+                                    <field name="student_count"/>
+                                    <field name="teacher_id" groups="student_management.group_student_admission"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Courses">
+                            <field name="course_ids" widget="many2many_tags"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_student_class" model="ir.actions.act_window">
+        <field name="name">Classes</field>
+        <field name="res_model">student.class</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="student_class_search_view"/>
+    </record>
+
+
+    <!-- ================================= -->
+    <!-- COURSE VIEWS                     -->
+    <!-- ================================= -->
+
+    <record id="student_course_search_view" model="ir.ui.view">
+        <field name="name">student.course.search</field>
+        <field name="model">student.course</field>
+        <field name="arch" type="xml">
+            <search string="Search Courses">
+                <field name="name"/>
+                <field name="code"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="student_course_list_view" model="ir.ui.view">
+        <field name="name">student.course.list</field>
+        <field name="model">student.course</field>
+        <field name="arch" type="xml">
+            <list string="Courses">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="credit_hours"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="student_course_form_view" model="ir.ui.view">
+        <field name="name">student.course.form</field>
+        <field name="model">student.course</field>
+        <field name="arch" type="xml">
+            <form string="Course">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="credit_hours"/>
+                        <field name="active"/>
+                        <field name="class_ids" widget="many2many_tags"/>
+                        <field name="teacher_ids" widget="many2many_tags" groups="student_management.group_student_admission"/>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Students">
+                            <field name="student_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email" groups="student_management.group_student_admission"/>
+                                    <field name="class_id"/>
+                                    <field name="student_number"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="student_guardian_list_view" model="ir.ui.view">
+        <field name="name">student.guardian.list</field>
+        <field name="model">student.guardian</field>
+        <field name="arch" type="xml">
+            <list string="Guardians"><field name="name"/><field name="relationship"/><field name="phone"/><field name="email"/><field name="emergency_contact"/></list>
+        </field>
+    </record>
+    <record id="student_guardian_form_view" model="ir.ui.view">
+        <field name="name">student.guardian.form</field>
+        <field name="model">student.guardian</field>
+        <field name="arch" type="xml">
+            <form string="Guardian"><sheet><group><field name="name"/><field name="relationship"/><field name="phone"/><field name="email"/><field name="emergency_contact"/></group><field name="student_ids" widget="many2many_tags"/><field name="notes"/></sheet></form>
+        </field>
+    </record>
+    <record id="action_student_guardian" model="ir.actions.act_window">
+        <field name="name">Guardians</field><field name="res_model">student.guardian</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="student_academic_year_list_view" model="ir.ui.view">
+        <field name="name">student.academic.year.list</field><field name="model">student.academic.year</field>
+        <field name="arch" type="xml"><list string="Academic Years"><field name="name"/><field name="date_start"/><field name="date_end"/><field name="active"/></list></field>
+    </record>
+    <record id="student_academic_year_form_view" model="ir.ui.view">
+        <field name="name">student.academic.year.form</field><field name="model">student.academic.year</field>
+        <field name="arch" type="xml"><form string="Academic Year"><sheet><group><field name="name"/><field name="date_start"/><field name="date_end"/><field name="active"/></group><field name="section_ids"><list editable="bottom"><field name="class_id"/><field name="name"/><field name="capacity"/><field name="teacher_id" groups="student_management.group_student_admission"/></list></field></sheet></form></field>
+    </record>
+    <record id="action_student_academic_year" model="ir.actions.act_window">
+        <field name="name">Academic Years</field><field name="res_model">student.academic.year</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="student_teacher_list_view" model="ir.ui.view">
+        <field name="name">student.teacher.list</field><field name="model">student.teacher</field>
+        <field name="arch" type="xml"><list string="Teachers"><field name="teacher_number"/><field name="name"/><field name="email"/><field name="phone"/><field name="specialization"/><field name="employment_status"/></list></field>
+    </record>
+    <record id="student_teacher_form_view" model="ir.ui.view">
+        <field name="name">student.teacher.form</field><field name="model">student.teacher</field>
+        <field name="arch" type="xml"><form string="Teacher"><sheet><group><group><field name="teacher_number"/><field name="name"/><field name="user_id"/></group><group><field name="email"/><field name="phone"/><field name="qualification"/><field name="specialization"/><field name="joining_date"/><field name="employment_status"/></group></group><notebook><page string="Sections"><field name="section_ids"><list><field name="name"/><field name="class_id"/><field name="academic_year_id"/></list></field></page><page string="Courses"><field name="course_ids" widget="many2many_tags"/></page></notebook></sheet></form></field>
+    </record>
+    <record id="action_student_teacher" model="ir.actions.act_window">
+        <field name="name">Teachers</field><field name="res_model">student.teacher</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="student_attendance_session_list_view" model="ir.ui.view">
+        <field name="name">student.attendance.session.list</field><field name="model">student.attendance.session</field>
+        <field name="arch" type="xml"><list string="Attendance Sessions"><field name="name"/><field name="session_date"/><field name="academic_year_id"/><field name="class_id"/><field name="section_id"/><field name="course_id"/><field name="teacher_id"/><field name="attendance_count"/><field name="state"/></list></field>
+    </record>
+    <record id="student_attendance_session_form_view" model="ir.ui.view">
+        <field name="name">student.attendance.session.form</field><field name="model">student.attendance.session</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Session">
+                <header>
+                    <button name="action_load_students" type="object" string="Load Roster" class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" invisible="state != 'confirmed'" groups="student_management.group_student_admission"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group><field name="session_date"/><field name="academic_year_id" readonly="1"/><field name="class_id" readonly="1"/><field name="section_id" readonly="state != 'draft'"/></group>
+                        <group><field name="course_id" readonly="state != 'draft'"/><field name="teacher_id" readonly="state != 'draft'"/><field name="attendance_count"/><field name="notes"/></group>
+                    </group>
+                    <field name="attendance_ids" readonly="state == 'confirmed'">
+                        <list editable="bottom"><field name="student_id"/><field name="status"/><field name="notes"/></list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_student_attendance" model="ir.actions.act_window">
+        <field name="name">Attendance</field><field name="res_model">student.attendance.session</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="student_exam_list_view" model="ir.ui.view">
+        <field name="name">student.exam.list</field><field name="model">student.exam</field>
+        <field name="arch" type="xml"><list string="Examinations"><field name="name"/><field name="exam_type"/><field name="course_id"/><field name="academic_year_id"/><field name="exam_date"/><field name="max_marks"/><field name="passing_marks"/><field name="teacher_id"/><field name="state"/></list></field>
+    </record>
+    <record id="student_exam_form_view" model="ir.ui.view">
+        <field name="name">student.exam.form</field><field name="model">student.exam</field>
+        <field name="arch" type="xml">
+            <form string="Examination">
+                <header>
+                    <button name="action_load_students" type="object" string="Load Enrolled Students" class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_confirm" type="object" string="Confirm Results" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" invisible="state != 'confirmed'" groups="student_management.group_student_admission"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group><field name="exam_type"/><field name="course_id" readonly="state != 'draft'"/><field name="academic_year_id" readonly="state != 'draft'"/><field name="exam_date"/></group>
+                        <group><field name="max_marks" readonly="state != 'draft'"/><field name="passing_marks" readonly="state != 'draft'"/><field name="teacher_id" readonly="state != 'draft'"/><field name="result_count"/><field name="notes"/></group>
+                    </group>
+                    <field name="result_ids" readonly="state == 'confirmed'">
+                        <list editable="bottom"><field name="student_id"/><field name="obtained_marks"/><field name="max_marks"/><field name="percentage" widget="percentage"/><field name="grade"/><field name="result_status"/><field name="notes"/></list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_student_exam" model="ir.actions.act_window">
+        <field name="name">Examinations</field><field name="res_model">student.exam</field><field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_student_course" model="ir.actions.act_window">
+        <field name="name">Courses</field>
+        <field name="res_model">student.course</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="student_course_search_view"/>
+    </record>
+
+
+    <record id="student_fee_structure_list_view" model="ir.ui.view">
+        <field name="name">student.fee.structure.list</field><field name="model">student.fee.structure</field>
+        <field name="arch" type="xml"><list string="Fee Structures"><field name="name"/><field name="fee_type"/><field name="amount"/><field name="company_id"/><field name="active"/></list></field>
+    </record>
+    <record id="student_fee_structure_form_view" model="ir.ui.view">
+        <field name="name">student.fee.structure.form</field><field name="model">student.fee.structure</field>
+        <field name="arch" type="xml"><form string="Fee Structure"><sheet><group><group><field name="name"/><field name="fee_type"/><field name="amount"/><field name="currency_id"/></group><group><field name="company_id"/><field name="account_id"/><field name="tax_ids" widget="many2many_tags"/><field name="active"/></group></group><group><field name="class_ids" widget="many2many_tags"/><field name="description"/></group></sheet></form></field>
+    </record>
+    <record id="action_student_fee_structure" model="ir.actions.act_window">
+        <field name="name">Fee Structures</field><field name="res_model">student.fee.structure</field><field name="view_mode">list,form</field>
+    </record>
+    <record id="student_fee_list_view" model="ir.ui.view">
+        <field name="name">student.fee.list</field><field name="model">student.fee</field>
+        <field name="arch" type="xml"><list string="Student Fees"><field name="name"/><field name="student_id"/><field name="fee_structure_id"/><field name="academic_year_id"/><field name="period"/><field name="amount_total"/><field name="due_date"/><field name="invoice_id" groups="student_management.group_student_accountant"/><field name="state"/></list></field>
+    </record>
+    <record id="student_fee_form_view" model="ir.ui.view">
+        <field name="name">student.fee.form</field><field name="model">student.fee</field>
+        <field name="arch" type="xml"><form string="Student Fee"><header><button name="action_create_invoice" type="object" string="Create and Post Invoice" class="btn-primary" invisible="invoice_id" groups="student_management.group_student_accountant"/><button name="action_view_invoice" type="object" string="Open Invoice" invisible="not invoice_id" groups="student_management.group_student_accountant"/><field name="state" widget="statusbar" statusbar_visible="draft,invoiced,partial,paid"/></header><sheet><div class="oe_title"><h1><field name="name"/></h1></div><group><group><field name="student_id"/><field name="fee_structure_id"/><field name="academic_year_id"/><field name="period"/><field name="due_date"/></group><group><field name="partner_id"/><field name="company_id"/><field name="currency_id"/><field name="amount"/><field name="discount_amount"/><field name="amount_total"/><field name="invoice_id" groups="student_management.group_student_accountant"/><field name="invoice_total" groups="student_management.group_student_accountant"/><field name="invoice_payment_state" groups="student_management.group_student_accountant"/></group></group><field name="notes"/></sheet></form></field>
+    </record>
+    <record id="action_student_fee" model="ir.actions.act_window">
+        <field name="name">Student Fees</field><field name="res_model">student.fee</field><field name="view_mode">list,form</field>
+    </record>
+    <record id="student_document_list_view" model="ir.ui.view">
+        <field name="name">student.document.list</field><field name="model">student.document</field>
+        <field name="arch" type="xml"><list string="Student Documents"><field name="name"/><field name="student_id"/><field name="document_type"/><field name="document_date"/><field name="valid_until"/><field name="file_name"/></list></field>
+    </record>
+    <record id="student_document_form_view" model="ir.ui.view">
+        <field name="name">student.document.form</field><field name="model">student.document</field>
+        <field name="arch" type="xml"><form string="Student Document"><sheet><group><field name="student_id"/><field name="name"/><field name="document_type"/><field name="document_date"/><field name="valid_until"/></group><group><field name="file_data" filename="file_name" widget="binary"/><field name="file_name" invisible="1"/><field name="notes"/></group></sheet></form></field>
+    </record>
+    <record id="action_student_document" model="ir.actions.act_window">
+        <field name="name">Student Documents</field><field name="res_model">student.document</field><field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================================= -->
+    <!-- MENUS                            -->
+    <!-- ================================= -->
+
+    <menuitem
+        id="menu_student_root"
+        name="Student Management"
+        sequence="10"
+        groups="student_management.group_student_admission,student_management.group_student_teacher,student_management.group_student_accountant"
+    />
+
+    <menuitem
+        id="menu_student_records"
+        name="Students"
+        parent="menu_student_root"
+        action="action_student"
+        sequence="10"
+        groups="student_management.group_student_admission,student_management.group_student_teacher"
+    />
+
+    <menuitem
+        id="menu_student_classes"
+        name="Classes"
+        parent="menu_student_root"
+        action="action_student_class"
+        sequence="20"
+        groups="student_management.group_student_admission,student_management.group_student_teacher"
+    />
+
+    <menuitem
+        id="menu_student_courses"
+        name="Courses"
+        parent="menu_student_root"
+        action="action_student_course"
+        sequence="30"
+        groups="student_management.group_student_admission,student_management.group_student_teacher"
+    />
+
+    <menuitem id="menu_student_academic_years" name="Academic Years" parent="menu_student_root" action="action_student_academic_year" sequence="40" groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+    <menuitem id="menu_student_guardians" name="Guardians" parent="menu_student_root" action="action_student_guardian" sequence="50" groups="student_management.group_student_admission"/>
+    <menuitem id="menu_student_teachers" name="Teachers" parent="menu_student_root" action="action_student_teacher" sequence="60" groups="student_management.group_student_admission"/>
+    <menuitem id="menu_student_attendance" name="Attendance" parent="menu_student_root" action="action_student_attendance" sequence="70" groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+    <menuitem id="menu_student_exams" name="Examinations" parent="menu_student_root" action="action_student_exam" sequence="80" groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+    <menuitem id="menu_student_fee_structures" name="Fee Structures" parent="menu_student_root" action="action_student_fee_structure" sequence="90" groups="student_management.group_student_admission,student_management.group_student_accountant"/>
+    <menuitem id="menu_student_fees" name="Student Fees" parent="menu_student_root" action="action_student_fee" sequence="100" groups="student_management.group_student_admission,student_management.group_student_accountant"/>
+    <menuitem id="menu_student_documents" name="Documents" parent="menu_student_root" action="action_student_document" sequence="110" groups="student_management.group_student_admission"/>
+
+</odoo>

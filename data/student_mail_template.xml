@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="mail_template_admission_confirmation" model="mail.template">
+        <field name="name">Student Admission Confirmation</field>
+        <field name="model_id" ref="model_student_student"/>
+        <field name="subject">Admission confirmed: {{ object.student_number }}</field>
+        <field name="email_to">{{ object.email }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Dear <t t-out="object.name"/>,</p>
+                <p>Your admission has been recorded.</p>
+                <p>Student ID: <strong t-out="object.student_number"/></p>
+                <p>Admission date: <span t-out="object.admission_date"/></p>
+                <p>Regards,<br/>Admissions Office</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+
+    <record id="mail_template_low_attendance_alert" model="mail.template">
+        <field name="name">Low Student Attendance Alert</field>
+        <field name="model_id" ref="model_student_student"/>
+        <field name="subject">Attendance alert for {{ object.name }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Hello,</p>
+                <p>Attendance for <strong t-out="object.name"/> (Student ID:
+                    <span t-out="object.student_number"/>) has fallen below the institution's configured threshold.</p>
+                <p>Current attendance: <strong t-out="object.attendance_percentage * 100"/>%.</p>
+                <p>Please contact the institution if you need more information.</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+
+    <record id="mail_template_overdue_fee_reminder" model="mail.template">
+        <field name="name">Overdue Student Fee Reminder</field>
+        <field name="model_id" ref="model_student_fee"/>
+        <field name="subject">Overdue fee {{ object.name }}</field>
+        <field name="email_to">{{ object.partner_id.email or '' }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Hello <t t-out="object.partner_id.name"/>,</p>
+                <p>This is a reminder that fee <strong t-out="object.name"/> for
+                    <span t-out="object.student_id.name"/> was due on
+                    <span t-out="object.due_date"/>.</p>
+                <p>Outstanding balance: <strong t-out="format_amount(object.balance_due, object.currency_id)"/>.</p>
+                <p>Please contact the institution's finance office if you have already paid.</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False"/>
+    </record>
+</odoo>

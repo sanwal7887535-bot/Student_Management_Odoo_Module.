@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+
+# Local environment and logs
+.env
+.env.*
+*.log
+
+# Agent instructions are local working guidance
+AGENTS.md

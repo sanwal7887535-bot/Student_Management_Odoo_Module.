@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="module_category_student_management" model="ir.module.category">
+        <field name="name">Student Management</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="privilege_student_management" model="res.groups.privilege">
+        <field name="name">Student Management</field>
+        <field name="sequence">30</field>
+        <field name="category_id" ref="module_category_student_management"/>
+    </record>
+    <record id="group_student_admission" model="res.groups">
+        <field name="name">Admission Staff</field>
+        <field name="privilege_id" ref="privilege_student_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="group_student_manager" model="res.groups">
+        <field name="name">Student Management Administrator</field>
+        <field name="privilege_id" ref="privilege_student_management"/>
+        <field name="implied_ids" eval="[(4, ref('group_student_admission'))]"/>
+    </record>
+    <record id="group_student_teacher" model="res.groups">
+        <field name="name">Teacher</field>
+        <field name="privilege_id" ref="privilege_student_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="group_student_accountant" model="res.groups">
+        <field name="name">Student Fees Accountant</field>
+        <field name="privilege_id" ref="privilege_student_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="rule_student_teacher_own_record" model="ir.rule">
+        <field name="name">Teachers: own teacher profile</field>
+        <field name="model_id" ref="model_student_teacher"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_student_teacher_students" model="ir.rule">
+        <field name="name">Teachers: assigned students</field>
+        <field name="model_id" ref="model_student_student"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id.user_id', '=', user.id), ('enrollment_ids.course_id.teacher_ids.user_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_student_teacher_classes" model="ir.rule">
+        <field name="name">Teachers: assigned classes</field>
+        <field name="model_id" ref="model_student_class"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">['|', ('section_ids.teacher_id.user_id', '=', user.id), ('course_ids.teacher_ids.user_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_student_teacher_sections" model="ir.rule">
+        <field name="name">Teachers: assigned sections</field>
+        <field name="model_id" ref="model_student_section"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">['|', ('teacher_id.user_id', '=', user.id), ('class_id.course_ids.teacher_ids.user_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_student_teacher_courses" model="ir.rule">
+        <field name="name">Teachers: assigned courses</field>
+        <field name="model_id" ref="model_student_course"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">[('teacher_ids.user_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_student_teacher_enrollments" model="ir.rule">
+        <field name="name">Teachers: enrollments in assigned courses</field>
+        <field name="model_id" ref="model_student_enrollment"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_ids.user_id', '=', user.id)]</field>
+        <field name="perm_write" eval="False"/><field name="perm_create" eval="False"/><field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_student_teacher_attendance_sessions" model="ir.rule">
+        <field name="name">Teachers: attendance for assigned sections or courses</field>
+        <field name="model_id" ref="model_student_attendance_session"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">['|', ('section_id.teacher_id.user_id', '=', user.id), ('course_id.teacher_ids.user_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_student_teacher_attendance_lines" model="ir.rule">
+        <field name="name">Teachers: attendance lines for assigned sessions</field>
+        <field name="model_id" ref="model_student_attendance"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">['|', ('session_id.section_id.teacher_id.user_id', '=', user.id), ('session_id.course_id.teacher_ids.user_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_student_teacher_exams" model="ir.rule">
+        <field name="name">Teachers: exams in assigned courses</field>
+        <field name="model_id" ref="model_student_exam"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">[('course_id.teacher_ids.user_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_student_teacher_exam_results" model="ir.rule">
+        <field name="name">Teachers: results in assigned courses</field>
+        <field name="model_id" ref="model_student_exam_result"/>
+        <field name="groups" eval="[(4, ref('group_student_teacher'))]"/>
+        <field name="domain_force">[('exam_id.course_id.teacher_ids.user_id', '=', user.id)]</field>
+    </record>
+    <record id="rule_student_fee_company" model="ir.rule">
+        <field name="name">Student fees: allowed companies</field>
+        <field name="model_id" ref="model_student_fee"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_student_fee_structure_company" model="ir.rule">
+        <field name="name">Fee structures: allowed companies</field>
+        <field name="model_id" ref="model_student_fee_structure"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+</odoo>

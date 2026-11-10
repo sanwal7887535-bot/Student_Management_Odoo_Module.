@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="student_dashboard_form_view" model="ir.ui.view">
+        <field name="name">student.dashboard.form</field>
+        <field name="model">student.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Institution Overview" create="0" edit="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Institution Overview</h1>
+                        <field name="dashboard_date" readonly="1"/>
+                    </div>
+                    <group>
+                        <group string="Students and Staffing">
+                            <field name="student_count"/>
+                            <field name="active_class_count"/>
+                            <field name="teacher_count"/>
+                        </group>
+                        <group string="Academic Performance"
+                               groups="student_management.group_student_admission,student_management.group_student_teacher">
+                            <field name="attendance_today"/>
+                            <field name="average_result"/>
+                        </group>
+                    </group>
+                    <group string="Finance"
+                           groups="student_management.group_student_admission,student_management.group_student_accountant">
+                        <field name="outstanding_fees" widget="monetary"/>
+                    </group>
+                    <footer>
+                        <button string="Refresh" type="object" name="action_refresh"
+                                class="btn-primary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_student_dashboard" model="ir.actions.server">
+        <field name="name">Institution Overview</field>
+        <field name="model_id" ref="model_student_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_dashboard()</field>
+    </record>
+    <!-- Attendance overview: filter by date, section, course, and mark. -->
+    <record id="student_attendance_report_graph" model="ir.ui.view">
+        <field name="name">student.attendance.report.graph</field>
+        <field name="model">student.attendance</field>
+        <field name="arch" type="xml">
+            <graph string="Attendance by Date" type="bar" stacked="True">
+                <field name="session_date" type="row" interval="month"/>
+                <field name="status" type="col"/>
+            </graph>
+        </field>
+    </record>
+    <record id="student_attendance_report_pivot" model="ir.ui.view">
+        <field name="name">student.attendance.report.pivot</field>
+        <field name="model">student.attendance</field>
+        <field name="arch" type="xml">
+            <pivot string="Attendance Summary">
+                <field name="section_id" type="row"/>
+                <field name="session_date" type="col" interval="month"/>
+                <field name="status" type="row"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_student_attendance_report" model="ir.actions.act_window">
+        <field name="name">Attendance Analysis</field>
+        <field name="res_model">student.attendance</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- Performance overview from entered examination results. -->
+    <record id="student_exam_result_report_graph" model="ir.ui.view">
+        <field name="name">student.exam.result.report.graph</field>
+        <field name="model">student.exam.result</field>
+        <field name="arch" type="xml">
+            <graph string="Average Marks by Course" type="bar">
+                <field name="course_id" type="row"/>
+                <field name="obtained_marks" type="measure" operator="avg"/>
+            </graph>
+        </field>
+    </record>
+    <record id="student_exam_result_report_pivot" model="ir.ui.view">
+        <field name="name">student.exam.result.report.pivot</field>
+        <field name="model">student.exam.result</field>
+        <field name="arch" type="xml">
+            <pivot string="Examination Performance">
+                <field name="course_id" type="row"/>
+                <field name="exam_id" type="col"/>
+                <field name="obtained_marks" type="measure" operator="avg"/>
+                <field name="percentage" type="measure" operator="avg"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_student_exam_result_report" model="ir.actions.act_window">
+        <field name="name">Examination Analysis</field>
+        <field name="res_model">student.exam.result</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <!-- Fee amounts and statuses remain sourced from the Accounting-backed fee records. -->
+    <record id="student_fee_report_graph" model="ir.ui.view">
+        <field name="name">student.fee.report.graph</field>
+        <field name="model">student.fee</field>
+        <field name="arch" type="xml">
+            <graph string="Fees by Status" type="bar" stacked="True">
+                <field name="invoice_payment_state" type="row"/>
+                <field name="amount_total" type="measure" operator="sum"/>
+            </graph>
+        </field>
+    </record>
+    <record id="student_fee_report_pivot" model="ir.ui.view">
+        <field name="name">student.fee.report.pivot</field>
+        <field name="model">student.fee</field>
+        <field name="arch" type="xml">
+            <pivot string="Fee Summary">
+                <field name="academic_year_id" type="row"/>
+                <field name="invoice_payment_state" type="col"/>
+                <field name="amount_total" type="measure" operator="sum"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_student_fee_report" model="ir.actions.act_window">
+        <field name="name">Fee Analysis</field>
+        <field name="res_model">student.fee</field>
+        <field name="view_mode">graph,pivot,list</field>
+    </record>
+
+    <menuitem id="menu_student_reports" name="Reports" parent="menu_student_root"
+              sequence="120"
+              groups="student_management.group_student_admission,student_management.group_student_teacher,student_management.group_student_accountant"/>
+    <menuitem id="menu_student_dashboard" name="Overview"
+              parent="menu_student_root" action="action_student_dashboard"
+              sequence="5"
+              groups="student_management.group_student_admission,student_management.group_student_teacher,student_management.group_student_accountant"/>
+    <menuitem id="menu_student_attendance_report" name="Attendance Analysis"
+              parent="menu_student_reports" action="action_student_attendance_report"
+              sequence="10"
+              groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+    <menuitem id="menu_student_exam_report" name="Examination Analysis"
+              parent="menu_student_reports" action="action_student_exam_result_report"
+              sequence="20"
+              groups="student_management.group_student_admission,student_management.group_student_teacher"/>
+    <menuitem id="menu_student_fee_report" name="Fee Analysis"
+              parent="menu_student_reports" action="action_student_fee_report"
+              sequence="30"
+              groups="student_management.group_student_admission,student_management.group_student_accountant"/>
+</odoo>

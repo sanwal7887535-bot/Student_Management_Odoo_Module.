@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_student_management" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.student.management</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app name="student_management" string="Student Management"
+                     groups="base.group_system">
+                    <block title="Student Notifications">
+                        <setting string="Low Attendance Alerts"
+                                 help="Queue an email to linked guardians when active students fall below the threshold.">
+                            <field name="attendance_alerts_enabled"/>
+                            <div class="content-group" invisible="not attendance_alerts_enabled">
+                                <field name="attendance_alert_threshold"/>
+                                <span class="text-muted">Percent attendance required</span>
+                            </div>
+                        </setting>
+                        <setting string="Overdue Fee Reminders"
+                                 help="Queue reminders for posted invoices with an outstanding balance.">
+                            <field name="fee_reminders_enabled"/>
+                        </setting>
+                        <setting string="Reminder Interval"
+                                 help="Minimum number of days between reminders to the same recipient.">
+                            <field name="reminder_repeat_days"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
